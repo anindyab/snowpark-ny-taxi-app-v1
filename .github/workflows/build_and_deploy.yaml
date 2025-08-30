@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          repository: anindyab/snowparkdev
+          repository: anindyab/snowpark-ny-taxi-app-v1
           #path: dev
           ref: dev
           
