@@ -2,7 +2,46 @@
 {
   "secrets": {
     "SNOWFLAKE_ACCOUNT": {
-      "description": "The Snowflake account identifier."
+      "description": "The Snowflake account identifier for local environment."
+    },
+    "SNOWFLAKE_USER": {
+      "description": "The Snowflake user name for local environment."
+    },
+    "SNOWFLAKE_PASSWORD": {
+      "description": "The Snowflake user password for local environment."
+    },
+    "SNOWFLAKE_WAREHOUSE": {
+      "description": "The Snowflake warehouse to use for local environment."
+    },
+    "SNOWFLAKE_DATABASE": {
+      "description": "The Snowflake database to use for local environment."
+    },
+    "SNOWFLAKE_SCHEMA": {
+    "description": "The Snowflake schema to use for local environment." 
+    },
+    "SNOWFLAKE_ROLE": {
+      "description": "The Snowflake role to use for local environment."
+    },
+    "SNOWFLAKE_ACCOUNT_DEV": {
+      "description": "The Snowflake account identifier for development environment."
+    },
+    "SNOWFLAKE_USER_DEV": {
+      "description": "The Snowflake user name for development environment."
+}   ,
+    "SNOWFLAKE_PASSWORD_DEV": {
+      "description": "The Snowflake user password for development environment."
+    },
+    "SNOWFLAKE_WAREHOUSE_DEV": {
+      "description": "The Snowflake warehouse to use for development environment."
+    },
+    "SNOWFLAKE_DATABASE_DEV": {
+      "description": "The Snowflake database to use for development environment."
+    },
+    "SNOWFLAKE_SCHEMA_DEV": {
+      "description": "The Snowflake schema to use for development environment."
+    },
+    "SNOWFLAKE_ROLE_DEV": {
+      "description": "The Snowflake role to use for development environment."
     }
   }
 }
