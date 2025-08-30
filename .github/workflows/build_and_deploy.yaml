@@ -48,14 +48,3 @@ jobs:
           SNOWFLAKE_DATABASE: ${ SNOWFLAKE_DATABASE_DEV }
         run: python deploy_snowpark_app.py $GITHUB_WORKSPACE/ny_taxi_ride
       
-      - name: Deploy Snowpark tasks
-        env:
-          SNOWFLAKE_ACCOUNT: ${ SNOWFLAKE_ACCOUNT_DEV }
-          SNOWFLAKE_USER: ${ SNOWFLAKE_USER_DEV }
-          SNOWFLAKE_PASSWORD: ${ SNOWFLAKE_PASSWORD_DEV }
-          SNOWFLAKE_ROLE: ${ SNOWFLAKE_ROLE_DEV }
-          SNOWFLAKE_WAREHOUSE: ${ SNOWFLAKE_WAREHOUSE_DEV }
-          SNOWFLAKE_DATABASE: ${ SNOWFLAKE_DATABASE_DEV }
-          SNOWFLAKE_SCHEMA: ${ SNOWFLAKE_SCHEMA_DEV }
-        working-directory: ny_taxi_ride/app
-        run: python create_task.py
