@@ -1,0 +1,50 @@
+name: Deploy Snowpark Apps
+
+# Controls when the action will run. 
+on:
+  push:
+    branches:
+      - dev
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: pradeepetl/snowparkdev
+          #path: dev
+          ref: dev
+          
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Get certifi path
+        id: certifi
+        run: |
+          echo "CA_PATH=$(python -m certifi)" >> $GITHUB_OUTPUT
+
+      - name: Deploy Snowpark apps
+        working-directory: ny_taxi_ride
+        env:
+          REQUESTS_CA_BUNDLE: ${{ steps.certifi.outputs.CA_PATH }}
+          SNOWFLAKE_OCSP_FAIL_OPEN: true
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_DEV }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER_DEV }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD_DEV }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE_DEV }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_DEV }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_DEV }}
+        run: python deploy_snowpark_app.py $GITHUB_WORKSPACE/ny_taxi_ride
+      
