@@ -30,9 +30,16 @@ jobs:
       - name: Install Python packages
         run: pip install -r requirements.txt
 
+      - name: Get certifi path
+        id: certifi
+        run: |
+          echo "CA_PATH=$(python -m certifi)" >> $GITHUB_OUTPUT
+
       - name: Deploy Snowpark apps
-        working-directory: first_snowpark_project
+        working-directory: ny_taxi_ride
         env:
+          REQUESTS_CA_BUNDLE: ${{ steps.certifi.outputs.CA_PATH }}
+          SNOWFLAKE_OCSP_FAIL_OPEN: true
           SNOWFLAKE_ACCOUNT: ${ SNOWFLAKE_ACCOUNT_DEV }
           SNOWFLAKE_USER: ${ SNOWFLAKE_USER_DEV }
           SNOWFLAKE_PASSWORD: ${ SNOWFLAKE_PASSWORD_DEV }
