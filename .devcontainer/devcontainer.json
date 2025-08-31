@@ -21,27 +21,6 @@
     },
     "SNOWFLAKE_ROLE": {
       "description": "The Snowflake role to use for local environment."
-    },
-    "SNOWFLAKE_ACCOUNT_DEV": {
-      "description": "The Snowflake account identifier for development environment."
-    },
-    "SNOWFLAKE_USER_DEV": {
-      "description": "The Snowflake user name for development environment."
-}   ,
-    "SNOWFLAKE_PASSWORD_DEV": {
-      "description": "The Snowflake user password for development environment."
-    },
-    "SNOWFLAKE_WAREHOUSE_DEV": {
-      "description": "The Snowflake warehouse to use for development environment."
-    },
-    "SNOWFLAKE_DATABASE_DEV": {
-      "description": "The Snowflake database to use for development environment."
-    },
-    "SNOWFLAKE_SCHEMA_DEV": {
-      "description": "The Snowflake schema to use for development environment."
-    },
-    "SNOWFLAKE_ROLE_DEV": {
-      "description": "The Snowflake role to use for development environment."
     }
   }
 }

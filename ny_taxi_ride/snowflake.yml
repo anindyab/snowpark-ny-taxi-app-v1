@@ -24,3 +24,8 @@ snowpark:
       signature: ""
       returns: string
       runtime: '3.9'
+    - name: test_procedure_two
+      handler: "procedures.test_procedure_two"
+      signature: ""
+      returns: string
+      runtime: '3.9'
