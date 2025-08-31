@@ -1,5 +1,6 @@
 import snowflake.connector
 import os
+import time
 
 # --- Print environment variables for debugging ---
 print(os.environ.get("SNOWFLAKE_ACCOUNT"))
@@ -69,15 +70,40 @@ try:
     cur.execute(child_task_sql)
     print(f"✅ Child task '{database_name}.{schema_name}.{child_task_name}' created.")
 
-    # Resume child first, then parent (order matters)
+    # Resume child first, then parent
     cur.execute(resume_child_task_sql)
     print(f"▶️ Child task '{database_name}.{schema_name}.{child_task_name}' resumed.")
 
     cur.execute(resume_parent_task_sql)
     print(f"▶️ Parent task '{database_name}.{schema_name}.{parent_task_name}' resumed.")
 
+    # --- Wait for tasks to run at least once ---
+    print("⏳ Waiting 70 seconds for tasks to execute...")
+    time.sleep(70)  # Wait slightly longer than the 1-minute schedule
+
+    # --- Query task history ---
+    history_sql = f"""
+    SELECT 
+      NAME,
+      STATE,
+      SCHEDULED_TIME,
+      COMPLETED_TIME,
+      QUERY_ID,
+      ERROR_MESSAGE
+    FROM SNOWFLAKE.ACCOUNT_USAGE.TASK_HISTORY
+    WHERE NAME IN ('{parent_task_name.upper()}', '{child_task_name.upper()}')
+      AND SCHEDULED_TIME >= DATEADD('minute', -5, CURRENT_TIMESTAMP())
+    ORDER BY SCHEDULED_TIME DESC;
+    """
+    cur.execute(history_sql)
+    rows = cur.fetchall()
+
+    print("\n📊 Task Execution History (last 5 minutes):")
+    for row in rows:
+        print(row)
+
 except Exception as e:
-    print(f"❌ Failed to create or resume tasks: {e}")
+    print(f"❌ Failed to create or check tasks: {e}")
 
 finally:
     cur.close()
