@@ -3,6 +3,9 @@ from __future__ import annotations
 import sys
 
 from common import print_hello
+from common import copy_to_table
+from config import configs
+from schema import schemas
 from snowflake.snowpark import Session
 
 
@@ -15,6 +18,9 @@ def test_procedure(session: Session) -> str:
 
 def test_procedure_two(session: Session) -> str:
     return "Test procedure two"
+
+def copy_to_table_proc(session: Session)-> str:
+    copied_into_result, qid = copy_to_table(session,configs.employee_config,schemas.emp_stg_schema)
 
 
 # For local debugging
