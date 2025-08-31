@@ -36,7 +36,7 @@ jobs:
           echo "CA_PATH=$(python -m certifi)" >> $GITHUB_OUTPUT
 
       - name: Deploy Snowpark apps
-        working-directory: ny_taxi_ride
+        working-directory: first_snowpark_project/ny_taxi_ride 
         env:
           REQUESTS_CA_BUNDLE: ${{ steps.certifi.outputs.CA_PATH }}
           SNOWFLAKE_OCSP_FAIL_OPEN: true
