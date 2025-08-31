@@ -1,4 +1,2 @@
-snowflake-cli-labs
-snowflake
 snowflake-snowpark-python
 certifi==2023.7.22
