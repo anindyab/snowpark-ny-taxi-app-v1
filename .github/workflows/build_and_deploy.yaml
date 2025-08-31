@@ -46,5 +46,5 @@ jobs:
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE_DEV }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_DEV }}
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_DEV }}
-        run: python deploy_snowpark_app.py  --allow-shared-libraries $GITHUB_WORKSPACE/ny_taxi_ride
+        run: python deploy_snowpark_app.py $GITHUB_WORKSPACE/ny_taxi_ride
       
