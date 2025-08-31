@@ -33,8 +33,4 @@ snowpark:
       handler: "procedures.copy_to_table_proc"
       signature: ""
       returns: string
-    - name: execute_sql_statements
-      handler: "procedures.execute_sql_statements"
-      signature: ""
-      returns: string
       runtime: '3.9'
