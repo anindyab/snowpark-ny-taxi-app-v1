@@ -30,6 +30,9 @@ jobs:
       - name: Install Python packages
         run: pip install -r requirements.txt
 
+      - name: Install Snowflake CLI
+        run: pip install snowflake-cli-labs
+
       - name: Get certifi path
         id: certifi
         run: |
