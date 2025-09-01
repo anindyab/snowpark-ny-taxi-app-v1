@@ -3,6 +3,7 @@ from snowflake.snowpark.functions import (
     col, hour, dayofmonth, month, year, dayofweek, lit, current_timestamp
 )
 from snowflake.snowpark import WhenMatchedClause, WhenNotMatchedClause
+from snowflake.snowpark.functions import when
 
 def dim_rate_code_ingest(session: Session) -> str:
     """
