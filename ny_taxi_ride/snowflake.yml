@@ -71,6 +71,13 @@ snowpark:
     - name: dim_vendor_ingest
       handler: "dim_vendor_procedure.dim_vendor_ingest"
       signature:
+        - name: session
+          type: snowflake.snowpark.Session
+      returns: string
+      runtime: 3.9
+    - name: dim_trip_distance_ingest
+      handler: "dim_trip_distance_procedure.dim_trip_distance_ingest"
+      signature:
       - name: session
         type: snowflake.snowpark.Session
       returns: string
