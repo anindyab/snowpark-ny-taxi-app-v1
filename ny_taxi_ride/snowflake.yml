@@ -34,3 +34,15 @@ snowpark:
       signature: ""
       returns: string
       runtime: '3.9'
+    - name: bronze_ingest_procedure
+      handler: "bronze.bronze_ingest_procedure"
+      returns: string
+      runtime: 3.9
+    - name: silver_clean_procedure
+      handler: "silver.silver_clean_procedure"
+      returns: string
+      runtime: 3.9
+    - name: gold_model_procedure
+      handler: "gold.gold_model_procedure"
+      returns: string
+      runtime: 3.9

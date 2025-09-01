@@ -29,31 +29,42 @@ except snowflake.connector.errors.ProgrammingError as e:
 print("✅ Successfully connected to Snowflake.")
 
 # --- Task Definitions ---
-parent_task_name = "my_parent_task"
-child_task_name = "my_child_task"
+nightly_root_task_name = "NIGHTLY_ROOT_TASK"
+silver_clean_task_name = "SILVER_CLEAN_TASK"
+gold_model_task_name = "GOLD_MODEL_TASK"
 database_name = os.environ.get("SNOWFLAKE_DATABASE")
-schema_name = "PUBLIC"
+schema_name = os.environ.get("SNOWFLAKE_SCHEMA")
 
-parent_task_sql = f"""
-CREATE OR REPLACE TASK {database_name}.{schema_name}.{parent_task_name}
+nightly_root_task_sql = f"""
+CREATE OR REPLACE TASK {database_name}.{schema_name}.{nightly_root_task_name}
   WAREHOUSE = '{os.environ.get("SNOWFLAKE_WAREHOUSE")}'
-  SCHEDULE = '1 MINUTE'
-  COMMENT = 'Parent task in a DAG. Calls the test_procedure Snowpark stored procedure.'
+  SCHEDULE = 'USING CRON 0 2 * * * UTC'
+  COMMENT = 'Nightly root task in the DAG. Calls the bronze_ingest_procedure Snowpark stored procedure.'
 AS
-  CALL {schema_name}.test_procedure();
+  CALL {schema_name}.bronze_ingest_procedure();
 """
 
-child_task_sql = f"""
-CREATE OR REPLACE TASK {database_name}.{schema_name}.{child_task_name}
+silver_clean_task_sql = f"""
+CREATE OR REPLACE TASK {database_name}.{schema_name}.{silver_clean_task_name}
   WAREHOUSE = '{os.environ.get("SNOWFLAKE_WAREHOUSE")}'
-  COMMENT = 'Child task in a DAG. Calls the test_procedure_two Snowpark stored procedure.'
-  AFTER {database_name}.{schema_name}.{parent_task_name}
+  COMMENT = 'Silver clean task in the DAG. Calls the silver_clean_procedure Snowpark stored procedure.'
+  AFTER {database_name}.{schema_name}.{nightly_root_task_name}
 AS
-  CALL {schema_name}.test_procedure_two();
+  CALL {schema_name}.silver_clean_procedure();
 """
 
-resume_parent_task_sql = f"ALTER TASK {database_name}.{schema_name}.{parent_task_name} RESUME;"
-resume_child_task_sql = f"ALTER TASK {database_name}.{schema_name}.{child_task_name} RESUME;"
+silver_clean_task_sql = f"""
+CREATE OR REPLACE TASK {database_name}.{schema_name}.{gold_model_task_name}
+  WAREHOUSE = '{os.environ.get("SNOWFLAKE_WAREHOUSE")}'
+  COMMENT = 'Silver clean task in the DAG. Calls the gold_model_procedure Snowpark stored procedure.'
+  AFTER {database_name}.{schema_name}.{nightly_root_task_name}
+AS
+  CALL {schema_name}.gold_model_procedure();
+"""
+
+resume_nightly_root_task_sql = f"ALTER TASK {database_name}.{schema_name}.{nightly_root_task_name} RESUME;"
+resume_silver_clean_task_sql = f"ALTER TASK {database_name}.{schema_name}.{silver_clean_task_name} RESUME;"
+resume_gold_model_task_sql = f"ALTER TASK {database_name}.{schema_name}.{gold_model_task_name} RESUME;"
 
 try:
     cur = conn.cursor()
@@ -64,18 +75,24 @@ try:
     print(f"📌 Using database {database_name} and schema {schema_name}.")
 
     # Create tasks
-    cur.execute(parent_task_sql)
-    print(f"✅ Parent task '{database_name}.{schema_name}.{parent_task_name}' created.")
+    cur.execute(nightly_root_task_sql)
+    print(f"✅ Nightly root task '{database_name}.{schema_name}.{nightly_root_task_name}' created.")
 
-    cur.execute(child_task_sql)
-    print(f"✅ Child task '{database_name}.{schema_name}.{child_task_name}' created.")
+    cur.execute(silver_clean_task_sql)
+    print(f"✅ Silver clean task '{database_name}.{schema_name}.{silver_clean_task_name}' created.")
+    
+    cur.execute(gold_model_task_sql)
+    print(f"✅ Gold model task '{database_name}.{schema_name}.{gold_model_task_name}' created.")
 
     # Resume child first, then parent
     cur.execute(resume_child_task_sql)
-    print(f"▶️ Child task '{database_name}.{schema_name}.{child_task_name}' resumed.")
+    print(f"▶️ Gold model task '{database_name}.{schema_name}.{gold_model_task_name}' resumed.")
 
     cur.execute(resume_parent_task_sql)
-    print(f"▶️ Parent task '{database_name}.{schema_name}.{parent_task_name}' resumed.")
+    print(f"▶️ Silver clean task '{database_name}.{schema_name}.{silver_clean_task_name}' resumed.")
+    
+    cur.execute(resume_nightly_root_task_sql)
+    print(f"▶️ Parent task '{database_name}.{schema_name}.{nightly_root_task_name}' resumed.")
 
     # --- Wait for tasks to run at least once ---
     print("⏳ Waiting 70 seconds for tasks to execute...")
@@ -91,7 +108,7 @@ try:
       QUERY_ID,
       ERROR_MESSAGE
     FROM SNOWFLAKE.ACCOUNT_USAGE.TASK_HISTORY
-    WHERE NAME IN ('{parent_task_name.upper()}', '{child_task_name.upper()}')
+    WHERE NAME IN ('{nightly_root_task_name.upper()}', '{silver_clean_task_name.upper()}', '{gold_model_task_name.upper()}')
       AND SCHEDULED_TIME >= DATEADD('minute', -5, CURRENT_TIMESTAMP())
     ORDER BY SCHEDULED_TIME DESC;
     """
