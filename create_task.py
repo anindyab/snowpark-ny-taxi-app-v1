@@ -53,11 +53,11 @@ AS
   CALL {schema_name}.silver_clean_procedure();
 """
 
-silver_clean_task_sql = f"""
+gold_model_task_sql = f"""
 CREATE OR REPLACE TASK {database_name}.{schema_name}.{gold_model_task_name}
   WAREHOUSE = '{os.environ.get("SNOWFLAKE_WAREHOUSE")}'
   COMMENT = 'Silver clean task in the DAG. Calls the gold_model_procedure Snowpark stored procedure.'
-  AFTER {database_name}.{schema_name}.{nightly_root_task_name}
+  AFTER {database_name}.{schema_name}.{silver_clean_task_name}
 AS
   CALL {schema_name}.gold_model_procedure();
 """
@@ -85,14 +85,17 @@ try:
     print(f"✅ Gold model task '{database_name}.{schema_name}.{gold_model_task_name}' created.")
 
     # Resume child first, then parent
-    cur.execute(resume_child_task_sql)
+    
+    cur.execute(resume_gold_model_task_sql)
     print(f"▶️ Gold model task '{database_name}.{schema_name}.{gold_model_task_name}' resumed.")
 
-    cur.execute(resume_parent_task_sql)
+    cur.execute(resume_silver_clean_task_sql)
     print(f"▶️ Silver clean task '{database_name}.{schema_name}.{silver_clean_task_name}' resumed.")
-    
+
     cur.execute(resume_nightly_root_task_sql)
     print(f"▶️ Parent task '{database_name}.{schema_name}.{nightly_root_task_name}' resumed.")
+
+
 
     # --- Wait for tasks to run at least once ---
     print("⏳ Waiting 70 seconds for tasks to execute...")
