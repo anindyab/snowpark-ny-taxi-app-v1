@@ -12,37 +12,66 @@ snowpark:
       returns: string
       runtime: '3.9'
   procedures:
-    - name: hello_procedure
-      handler: "procedures.hello_procedure"
-      signature:
-        - name: "name"
-          type: "string"
-      returns: string
-      runtime: '3.9'
-    - name: test_procedure
-      handler: "procedures.test_procedure"
-      signature: ""
-      returns: string
-      runtime: '3.9'
-    - name: test_procedure_two
-      handler: "procedures.test_procedure_two"
-      signature: ""
-      returns: string
-      runtime: '3.9'
-    - name: copy_to_table_proc
-      handler: "procedures.copy_to_table_proc"
-      signature: ""
-      returns: string
-      runtime: '3.9'
     - name: bronze_ingest_procedure
       handler: "bronze.bronze_ingest_procedure"
+      signature:
+      - name: session
+        type: snowflake.snowpark.Session
       returns: string
       runtime: 3.9
     - name: silver_clean_procedure
       handler: "silver.silver_clean_procedure"
+      signature:
+      - name: session
+        type: snowflake.snowpark.Session
       returns: string
       runtime: 3.9
     - name: gold_model_procedure
       handler: "gold.gold_model_procedure"
+      signature:
+      - name: session
+        type: snowflake.snowpark.Session
+      returns: string
+      runtime: 3.9
+    - name: dim_datetime_ingest
+      handler: "dim_datetime_procedure.dim_datetime_ingest"
+      signature:
+      - name: session
+        type: snowflake.snowpark.Session
+      returns: string
+      runtime: 3.9
+    - name: dim_location_ingest
+      handler: "dim_location_procedure.dim_location_ingest"
+      signature:
+      - name: session
+        type: snowflake.snowpark.Session
+      returns: string
+      runtime: 3.9
+    - name: dim_passenger_count_ingest
+      handler: "dim_passenger_count_procedure.dim_passenger_count_ingest"
+      signature:
+      - name: session
+        type: snowflake.snowpark.Session
+      returns: string
+      runtime: 3.9
+    - name: dim_payment_type_ingest
+      handler: "dim_payment_type_procedure.dim_payment_type_ingest"
+      signature:
+      - name: session
+        type: snowflake.snowpark.Session
+      returns: string
+      runtime: 3.9
+    - name: dim_rate_code_ingest
+      handler: "dim_rate_code_procedure.dim_rate_code_ingest"
+      signature:
+      - name: session
+        type: snowflake.snowpark.Session
+      returns: string
+      runtime: 3.9
+    - name: dim_vendor_ingest
+      handler: "dim_vendor_procedure.dim_vendor_ingest"
+      signature:
+      - name: session
+        type: snowflake.snowpark.Session
       returns: string
       runtime: 3.9
