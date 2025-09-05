@@ -38,7 +38,7 @@ schema_name = os.environ.get("SNOWFLAKE_SCHEMA")
 nightly_root_task_sql = f"""
 CREATE OR REPLACE TASK {database_name}.{schema_name}.{nightly_root_task_name}
   WAREHOUSE = '{os.environ.get("SNOWFLAKE_WAREHOUSE")}'
-  SCHEDULE = 'USING CRON 0 2 * * * UTC'
+  SCHEDULE = '1 MINUTE'
   COMMENT = 'Nightly root task in the DAG. Calls the bronze_ingest_procedure Snowpark stored procedure.'
 AS
   CALL {schema_name}.bronze_ingest_procedure();
