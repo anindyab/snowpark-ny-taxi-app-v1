@@ -50,6 +50,30 @@ This repository contains Python scripts to:
 - https://github.com/anindyab/snowpark-ny-taxi-app-v1/blob/devenv/ny_taxi_ride/app/procedures.py describes these procedures. The code is suitably commented
 - The DDL for all tables is in https://github.com/anindyab/snowpark-ny-taxi-app-v1/blob/devenv/ddl.sql
 
+# Bronze layer goals
+
+- Column renaming - standardizing schema early — great for downstream consistency.
+- Metadata tagging: Including file_name, ride_id, and load_time is excellent for lineage.
+- Reject handling
+- Load logging: Writing to  ensures traceability and operational monitoring.
+
+# Silver layer goals
+
+- Clean and validate raw data
+- Derive metrics: ridu_duration_minutes, avg_speed_mph
+- Add flags: is_airport_trip, is_peak_hour
+- Tag quality: data_quality_flag
+- Preserve lineage: ride_id, file_name, load_time
+
+# Gold layer goals
+
+- Clear docstring: Communicates purpose and return value.
+- Distinct filtering: Ensures only valid payment_type values are processed.
+- Descriptive mapping: Adds semantic clarity to raw codes.
+- Merge logic: Uses Snowpark’s merge() with upsert semantics — perfect.
+- Load logging: Inserts into DIMENSION_LOAD_LOG with parameter binding — secure and auditable.
+
+
 # Vault
 We have used the following
 - Repository secrets to store account, user, password, warehouse, database, schema and role in order to build and deploy artifacts from local to dev,qa, and prod environments (see https://github.com/anindyab/snowpark-ny-taxi-app-v1/blob/devenv/.github/workflows/build_and_deploy.yaml)
