@@ -1,6 +1,6 @@
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import (
-    col, hour, dayofmonth, month, year, dayofweek, lit, current_timestamp, when
+    col, lit, when
 )
 from snowflake.snowpark import WhenMatchedClause, WhenNotMatchedClause
 

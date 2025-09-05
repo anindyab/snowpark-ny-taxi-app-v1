@@ -1,5 +1,5 @@
 from snowflake.snowpark import Session
-from snowflake.snowpark.functions import col, lit, when, current_timestamp
+from snowflake.snowpark.functions import col, lit, when
 from snowflake.snowpark import WhenMatchedClause, WhenNotMatchedClause
 
 def dim_trip_distance_ingest(session: Session) -> str:

@@ -1,8 +1,7 @@
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import (
-    col, hour, dayofmonth, month, year, dayofweek, lit, current_timestamp
+    col, lit
 )
-from snowflake.snowpark import WhenMatchedClause, WhenNotMatchedClause
 
 
 def dim_payment_type_ingest(session: Session) -> str:

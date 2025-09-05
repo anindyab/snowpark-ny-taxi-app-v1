@@ -1,5 +1,5 @@
 from snowflake.snowpark import Session
-from snowflake.snowpark.functions import col, current_timestamp
+from snowflake.snowpark.functions import col
 from snowflake.snowpark import WhenNotMatchedClause
 
 def fact_taxi_rides_ingest(session: Session) -> str:

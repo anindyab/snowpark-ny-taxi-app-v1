@@ -1,84 +1,73 @@
 definition_version: "1.1"
+
 snowpark:
   project_name: "ny_taxi_app_project"
   stage_name: "dev_deployment"
   src: "app/"
-  functions:
-    - name: hello_function
-      handler: "functions.hello_function"
-      signature:
-        - name: "name"
-          type: "string"
-      returns: string
-      runtime: '3.9'
+
   procedures:
     - name: bronze_ingest_procedure
-      handler: "bronze.bronze_ingest_procedure"
-      signature:
-      - name: session
-        type: snowflake.snowpark.Session
+      handler: bronze.bronze_ingest_procedure
+      signature: []
       returns: string
       runtime: 3.9
+
     - name: silver_clean_procedure
-      handler: "silver.silver_clean_procedure"
-      signature:
-      - name: session
-        type: snowflake.snowpark.Session
+      handler: silver.silver_clean_procedure
+      signature: []
       returns: string
       runtime: 3.9
+
     - name: gold_model_procedure
-      handler: "gold.gold_model_procedure"
-      signature:
-      - name: session
-        type: snowflake.snowpark.Session
+      handler: gold.gold_model_procedure
+      signature: []
       returns: string
       runtime: 3.9
+
+    - name: fact_taxi_rides_procedure
+      handler: fact_taxi_rides_procedure.fact_taxi_rides_ingest
+      signature: []
+      returns: string
+      runtime: 3.9
+
     - name: dim_datetime_ingest
-      handler: "dim_datetime_procedure.dim_datetime_ingest"
-      signature:
-      - name: session
-        type: snowflake.snowpark.Session
+      handler: dim_datetime_procedure.dim_datetime_ingest
+      signature: []
       returns: string
       runtime: 3.9
+
     - name: dim_location_ingest
-      handler: "dim_location_procedure.dim_location_ingest"
-      signature:
-      - name: session
-        type: snowflake.snowpark.Session
+      handler: dim_location_procedure.dim_location_ingest
+      signature: []
       returns: string
       runtime: 3.9
+
     - name: dim_passenger_count_ingest
-      handler: "dim_passenger_count_procedure.dim_passenger_count_ingest"
-      signature:
-      - name: session
-        type: snowflake.snowpark.Session
+      handler: dim_passenger_count_procedure.dim_passenger_count_ingest
+      signature: []
       returns: string
       runtime: 3.9
+
     - name: dim_payment_type_ingest
-      handler: "dim_payment_type_procedure.dim_payment_type_ingest"
-      signature:
-      - name: session
-        type: snowflake.snowpark.Session
+      handler: dim_payment_type_procedure.dim_payment_type_ingest
+      signature: []
       returns: string
       runtime: 3.9
+
     - name: dim_rate_code_ingest
-      handler: "dim_rate_code_procedure.dim_rate_code_ingest"
-      signature:
-      - name: session
-        type: snowflake.snowpark.Session
+      handler: dim_rate_code_procedure.dim_rate_code_ingest
+      signature: []
       returns: string
       runtime: 3.9
+
     - name: dim_vendor_ingest
-      handler: "dim_vendor_procedure.dim_vendor_ingest"
-      signature:
-        - name: session
-          type: snowflake.snowpark.Session
+      handler: dim_vendor_procedure.dim_vendor_ingest
+      signature: []
       returns: string
       runtime: 3.9
+
     - name: dim_trip_distance_ingest
-      handler: "dim_trip_distance_procedure.dim_trip_distance_ingest"
-      signature:
-      - name: session
-        type: snowflake.snowpark.Session
+      handler: dim_trip_distance_procedure.dim_trip_distance_ingest
+      signature: []
       returns: string
       runtime: 3.9
