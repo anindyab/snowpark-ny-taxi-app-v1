@@ -18,8 +18,6 @@ URL = 's3://dateng-snowflake/loadingdata/csv/'
 FILE_FORMAT = CSV_ETL_FILEFORMAT
 
 CREATE OR REPLACE TABLE BRONZE_NY_TAXI_RIDES (
-  ride_id STRING,
-  load_time TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP,
   vendor_id INTEGER,
   pickup_datetime TIMESTAMP_NTZ,
   dropoff_datetime TIMESTAMP_NTZ,
@@ -40,16 +38,16 @@ CREATE OR REPLACE TABLE BRONZE_NY_TAXI_RIDES (
   congestion_surcharge FLOAT,
   airport_fee FLOAT,
   cbd_congestion_fee FLOAT,
-  ride_month INTEGER,
-  ride_type STRING,
   file_name STRING,
+  ride_id STRING,
+  load_time TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP,
   base_name STRING,
+  ride_month STRING,
+  ride_type STRING,
   UNIQUE(ride_id) -- Ensure ride_id uniqueness
 );
 
 CREATE OR REPLACE TABLE BRONZE_NY_TAXI_RIDES_REJECTS (
-  ride_id STRING,
-  load_time TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP,
   vendor_id INTEGER,
   pickup_datetime TIMESTAMP_NTZ,
   dropoff_datetime TIMESTAMP_NTZ,
@@ -70,16 +68,17 @@ CREATE OR REPLACE TABLE BRONZE_NY_TAXI_RIDES_REJECTS (
   congestion_surcharge FLOAT,
   airport_fee FLOAT,
   cbd_congestion_fee FLOAT,
-  ride_month INTEGER,
-  ride_type STRING,
   file_name STRING,
+  ride_id STRING,
+  load_time TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP,
   base_name STRING,
-  UNIQUE(ride_id),                 -- Ensure ride_id uniqueness 
-
+  ride_month STRING,
+  ride_type STRING,
   -- Additional audit columns
   rejection_reason STRING,         -- e.g. 'missing pickup_datetime', 'negative fare_amount'
+  rejection_time TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP,
   rejection_stage STRING,          -- e.g. 'bronze_ingest', 'schema_validation'
-  rejection_time TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP
+  UNIQUE(ride_id) -- Ensure ride_id uniqueness
 );
  
 
@@ -211,15 +210,15 @@ CREATE OR REPLACE TABLE FACT_TAXI_RIDES (
     tolls_amount FLOAT,
     improvement_surcharge FLOAT,
     total_amount FLOAT,
-	congestion_surcharge FLOAT,
-	airport_fee FLOAT,
-	cbd_congestion_fee FLOAT,
-	ride_month INTEGER,
-	ride_type STRING,
-	ride_duration_minutes FLOAT,
-	avg_speed_mph FLOAT,
-	is_airport_trip BOOLEAN,
-	is_peak_hour BOOLEAN,
+    congestion_surcharge FLOAT,
+    airport_fee FLOAT,
+    cbd_congestion_fee FLOAT,
+    ride_month INTEGER,
+    ride_type STRING,
+    ride_duration_minutes FLOAT,
+    avg_speed_mph FLOAT,
+    is_airport_trip BOOLEAN,
+    is_peak_hour BOOLEAN,
 
     FOREIGN KEY (datetime_id) REFERENCES DATETIME_DIM(DATETIME_ID),
     FOREIGN KEY (passenger_count_id) REFERENCES PASSENGER_COUNT_DIM(passenger_count_id),

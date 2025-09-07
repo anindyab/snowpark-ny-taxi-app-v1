@@ -22,12 +22,12 @@ def bronze_ingest_procedure(session: Session) -> str:
     # --- Define Stage and File Format ---
     parquet_stage = "@NYC_TAXI_RIDE_DB.TRIP_DATA.AWS_ETL_PARQUET_STAGE"
     start_timestamp = datetime.now()
-
+    df = None       
     # Read from stage
     try:
         df = session.sql(f"""
             SELECT
-                CAST($1:"VendorID" AS INT) AS VENDOR_ID,
+                $1:"VendorID"::NUMBER AS VENDOR_ID,
                 TO_TIMESTAMP_NTZ($1:"tpep_pickup_datetime"::BIGINT, 6) AS PICKUP_DATETIME,
                 TO_TIMESTAMP_NTZ($1:"tpep_dropoff_datetime"::BIGINT, 6) AS DROPOFF_DATETIME,
                 CAST($1:"passenger_count" AS INT) AS PASSENGER_COUNT,
@@ -67,7 +67,6 @@ def bronze_ingest_procedure(session: Session) -> str:
             ).cast("STRING")
         ).with_column("LOAD_TIME", current_timestamp())
         
-        
         # Extract just the filename (strip directories)
         df = df.with_column(
             "BASE_NAME",
@@ -85,7 +84,6 @@ def bronze_ingest_procedure(session: Session) -> str:
             f"Stage {parquet_stage} does not exist. Please check your configuration."
         ) from e
 
-
     # Reject invalid rows
     reject_df = (
         df.filter(
@@ -100,18 +98,19 @@ def bronze_ingest_procedure(session: Session) -> str:
 
     # Save rejects
     reject_df.write.mode("append").save_as_table("BRONZE_NY_TAXI_RIDES_REJECTS")
-
+    
     # Valid rows
     valid_df = df.filter(
         (col("PICKUP_DATETIME").is_not_null()) &
         (col("DROPOFF_DATETIME").is_not_null()) &
         (col("FARE_AMOUNT") > 0)
-    ).drop_duplicates(["ride_id"])
+    ).drop_duplicates(["RIDE_ID"])
     
     # Save valid records
     valid_df.write.mode("append").save_as_table("BRONZE_NY_TAXI_RIDES")
 
-    # Log counts
+    
+     # Log counts
     row_count = valid_df.count()
     rejected_count = reject_df.count()
     end_timestamp = datetime.now()
@@ -122,7 +121,7 @@ def bronze_ingest_procedure(session: Session) -> str:
             load_start_time, load_end_time, row_count, rejected_row_count, status, error_message
         )
         VALUES (
-            {start_timestamp}, {end_timestamp}, {row_count}, {rejected_count}, 'success', NULL
+            '{start_timestamp}', '{end_timestamp}', {row_count}, {rejected_count}, 'success', NULL
         )
     """).collect()
 
