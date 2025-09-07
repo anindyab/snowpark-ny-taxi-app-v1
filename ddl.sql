@@ -81,6 +81,15 @@ CREATE OR REPLACE TABLE BRONZE_NY_TAXI_RIDES_REJECTS (
   UNIQUE(ride_id) -- Ensure ride_id uniqueness
 );
  
+CREATE OR REPLACE TABLE BRONZE_LOAD_LOG (
+  log_id INT AUTOINCREMENT PRIMARY KEY,
+  load_start_time TIMESTAMP_NTZ,
+  load_end_time TIMESTAMP_NTZ,
+  row_count INT,
+  rejected_row_count INT,
+  status STRING,                  -- e.g. 'success', 'failed'
+  error_message STRING            -- nullable
+); 
 
 CREATE OR REPLACE TABLE SILVER_NY_TAXI_RIDES (
   vendor_id INTEGER,
@@ -103,17 +112,44 @@ CREATE OR REPLACE TABLE SILVER_NY_TAXI_RIDES (
   congestion_surcharge FLOAT,
   airport_fee FLOAT,
   cbd_congestion_fee FLOAT,
-  ride_month INTEGER,
+  base_name STRING,
+  ride_month STRING,
   ride_type STRING,
   ride_duration_minutes FLOAT,
   avg_speed_mph FLOAT,
   data_quality_flag STRING DEFAULT 'valid', -- e.g. 'valid', 'outlier', 'missing_fields'
   is_airport_trip BOOLEAN,
+  pickup_hour INTEGER,
+  pickup_weekday INTEGER,
   is_peak_hour BOOLEAN,
   load_time TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP,
   ride_id STRING UNIQUE,
-  file_name STRING  
+  file_name STRING
 );
+
+CREATE OR REPLACE TABLE SILVER_NY_TAXI_RIDES_REJECTS (
+    ride_id STRING,
+    vendor_id INTEGER,
+    pickup_datetime TIMESTAMP_NTZ,
+    dropoff_datetime TIMESTAMP_NTZ,
+    trip_distance FLOAT,
+    ride_duration_minutes FLOAT,
+    avg_speed_mph FLOAT,
+    rejection_reason STRING,
+    rejection_stage STRING,   -- 'silver_quality_check'
+    rejection_time TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE OR REPLACE TABLE SILVER_LOAD_LOG (
+  log_id INT AUTOINCREMENT PRIMARY KEY,
+  load_start_time TIMESTAMP_NTZ,
+  load_end_time TIMESTAMP_NTZ,
+  source_row_count NUMBER,
+  transformed_row_count NUMBER,
+  rejected_row_count NUMBER,
+  status STRING,         -- 'success' / 'failed'
+  error_message STRING
+); 
 
 
 CREATE OR REPLACE TABLE LOCATION_REFERENCE (
@@ -252,13 +288,5 @@ CREATE OR REPLACE TABLE FACT_LOAD_LOG (
   error_message STRING            -- nullable
 ); 
 
-CREATE OR REPLACE TABLE BRONZE_LOAD_LOG (
-  log_id INT AUTOINCREMENT PRIMARY KEY,
-  load_start_time TIMESTAMP_NTZ,
-  load_end_time TIMESTAMP_NTZ,
-  row_count INT,
-  rejected_row_count INT,
-  status STRING,                  -- e.g. 'success', 'failed'
-  error_message STRING            -- nullable
-); 
+
 
