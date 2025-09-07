@@ -1,7 +1,8 @@
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import (
-    col, lit
+    col, lit, when, when_matched, when_not_matched
 )
+from datetime import datetime
 
 
 def dim_payment_type_ingest(session: Session) -> str:
@@ -12,6 +13,8 @@ def dim_payment_type_ingest(session: Session) -> str:
     Returns:
         str: Status message indicating completion.
     """
+    start_timestamp = datetime.now()
+
     try:
         # Read the silver layer data
         silver_df = session.table("SILVER_NY_TAXI_RIDES")
@@ -40,8 +43,8 @@ def dim_payment_type_ingest(session: Session) -> str:
 
     # Convert the column names to match the VENDOR_DIM table
     payment_type_df = payment_type_df.select(
-        col("payment_type").cast("int").alias("PAYMENT_TYPE"),
-        col("payment_type_name").alias("PAYMENT_TYPE_NAME")
+        col("PAYMENT_TYPE"),
+        col("PAYMENT_TYPE_NAME")
     )
 
     # Merge the data into the PAYMENT_TYPE_DIM table
@@ -49,26 +52,26 @@ def dim_payment_type_ingest(session: Session) -> str:
     from snowflake.snowpark import WhenMatchedClause, WhenNotMatchedClause
 
     payment_type_dim_table.merge(
-        source=payment_type_df,
-        join_expr=payment_type_dim_table["payment_type"] == payment_type_df["PAYMENT_TYPE"],
-        when_matched=[
-            WhenMatchedClause(update={"payment_type_name": payment_type_df["PAYMENT_TYPE_NAME"]})
-        ],
-        when_not_matched=[
-            WhenNotMatchedClause(insert={"payment_type": payment_type_df["PAYMENT_TYPE"], "payment_type_name": payment_type_df["PAYMENT_TYPE_NAME"]})
+        payment_type_df,
+        payment_type_dim_table["PAYMENT_TYPE"] == payment_type_df["PAYMENT_TYPE"],
+        [
+            when_matched().update({"PAYMENT_TYPE_NAME": payment_type_df["PAYMENT_TYPE_NAME"]}),
+            when_not_matched().insert({"PAYMENT_TYPE": payment_type_df["PAYMENT_TYPE"], "PAYMENT_TYPE_NAME": payment_type_df["PAYMENT_TYPE_NAME"]})
         ]
     )
-    
+    # Log the load    
+    end_timestamp = datetime.now()
+    dimension_name = "PAYMENT_TYPE_DIM"
     row_count = payment_type_df.count()
-
-    session.sql("""
+    
+    session.sql(f"""
         INSERT INTO DIMENSION_LOAD_LOG (
             dimension_name, load_start_time, load_end_time, row_count, status, error_message
         )
         VALUES (
-            ?, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), ?, ?, ?
+            '{dimension_name}','{start_timestamp}', '{end_timestamp}', {row_count}, 'success', NULL
         )
-    """).bind(["PAYMENT_TYPE_DIM", row_count, "success", None]).collect()
+    """).collect()
     
     return "Payment type Dimension table successfully merged/updated."
 
