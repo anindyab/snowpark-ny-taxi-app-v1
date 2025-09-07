@@ -1,9 +1,8 @@
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import (
-    col, lit, when
+    col, lit, when, when_matched, when_not_matched
 )
-from snowflake.snowpark import WhenMatchedClause, WhenNotMatchedClause
-
+from datetime import datetime
 
 def dim_passenger_count_ingest(session: Session) -> str:
     """
@@ -12,6 +11,7 @@ def dim_passenger_count_ingest(session: Session) -> str:
     Returns:
         str: Status message indicating completion.
     """
+    start_timestamp = datetime.now()
 
     try:
         silver_df = session.table("SILVER_NY_TAXI_RIDES")
@@ -43,13 +43,11 @@ def dim_passenger_count_ingest(session: Session) -> str:
     # Merge into PASSENGER_COUNT_DIM
     dim_table = session.table("PASSENGER_COUNT_DIM")
     dim_table.merge(
-        source=passenger_df,
-        join_expr=dim_table["PASSENGER_COUNT"] == passenger_df["PASSENGER_COUNT"],
-        when_matched=[
-            WhenMatchedClause(update={"PASSENGER_BUCKET": passenger_df["PASSENGER_BUCKET"]})
-        ],
-        when_not_matched=[
-            WhenNotMatchedClause(insert={
+        passenger_df,
+        dim_table["PASSENGER_COUNT"] == passenger_df["PASSENGER_COUNT"],
+        [
+            when_matched().update({"PASSENGER_BUCKET": passenger_df["PASSENGER_BUCKET"]}),
+            when_not_matched().insert({
                 "PASSENGER_COUNT": passenger_df["PASSENGER_COUNT"],
                 "PASSENGER_BUCKET": passenger_df["PASSENGER_BUCKET"]
             })
@@ -57,13 +55,18 @@ def dim_passenger_count_ingest(session: Session) -> str:
     )
 
     # Log the load
+    end_timestamp = datetime.now()
+    dimension_name = "PASSENGER_COUNT_DIM"
     row_count = passenger_df.count()
-    session.sql("""
+    
+    session.sql(f"""
         INSERT INTO DIMENSION_LOAD_LOG (
-            dimension_name, load_start_time, load_end_time, row_count, status, error_message
+             dimension_name, load_start_time, load_end_time, row_count, status, error_message
         )
-        VALUES (?, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), ?, ?, ?)
-    """).bind(["PASSENGER_COUNT_DIM", row_count, "success", None]).collect()
+        VALUES (
+            '{dimension_name}','{start_timestamp}', '{end_timestamp}', {row_count}, 'success', NULL
+        )
+    """).collect()
 
     return "Passenger Count Dimension table successfully merged/updated."
 
