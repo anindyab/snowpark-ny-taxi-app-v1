@@ -27,6 +27,8 @@ def silver_clean_procedure(session: Session) -> str:
                 df.filter((col("PICKUP_DATETIME").is_not_null()) & (col("DROPOFF_DATETIME").is_not_null()))
                 .filter(col("PICKUP_DATETIME") < col("DROPOFF_DATETIME"))
                 .filter((col("TRIP_DISTANCE") > 0.1) & (col("FARE_AMOUNT") > 0))
+                .filter((col("PICKUP_LOCATION_ID") != 264) & (col("PICKUP_LOCATION_ID") != 265))
+                .filter((col("DROPOFF_LOCATION_ID") != 264) & (col("DROPOFF_LOCATION_ID") != 265))
             )
 
             # Derived metrics
@@ -113,7 +115,11 @@ def silver_clean_procedure(session: Session) -> str:
                 (col("PICKUP_DATETIME") >= col("DROPOFF_DATETIME")) |
                 (col("TRIP_DISTANCE") <= 0.1) | 
                 (col("RIDE_DURATION_MINUTES") <= 0) |
-                (col("AVG_SPEED_MPH") >= 100)
+                (col("AVG_SPEED_MPH") >= 100) |
+                (col("PICKUP_LOCATION_ID") == 264) |
+                (col("PICKUP_LOCATION_ID") == 265) |
+                (col("DROPOFF_LOCATION_ID") == 264) |
+                (col("DROPOFF_LOCATION_ID") == 265)
             )
             
             print(reject_df.count())
@@ -124,10 +130,12 @@ def silver_clean_procedure(session: Session) -> str:
                     col("VENDOR_ID"),
                     col("PICKUP_DATETIME"),
                     col("DROPOFF_DATETIME"),
+                    col("PICKUP_LOCATION_ID"),
+                    col("DROPOFF_LOCATION_ID"),
                     col("TRIP_DISTANCE"),
                     col("RIDE_DURATION_MINUTES"),
                     col("AVG_SPEED_MPH"),
-                    lit("invalid_duration_or_speed").alias("REJECTION_REASON"),
+                    lit("invalid_duration, location or speed").alias("REJECTION_REASON"),
                     lit("silver_quality_check").alias("REJECTION_STAGE"),
                     current_timestamp().alias("REJECTION_TIME")
                 )

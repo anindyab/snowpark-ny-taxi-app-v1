@@ -17,6 +17,9 @@ STORAGE_INTEGRATION = AWS_S3_NYCT_INT
 URL = 's3://dateng-snowflake/loadingdata/csv/'
 FILE_FORMAT = CSV_ETL_FILEFORMAT
 
+COPY INTO LOCATION_REFERENCE FROM @AWS_ETL_CSV_STAGE 
+FILES=('taxi_lookup_zone_enhanced.csv')
+
 CREATE OR REPLACE TABLE BRONZE_NY_TAXI_RIDES (
   vendor_id INTEGER,
   pickup_datetime TIMESTAMP_NTZ,
@@ -132,6 +135,8 @@ CREATE OR REPLACE TABLE SILVER_NY_TAXI_RIDES_REJECTS (
     vendor_id INTEGER,
     pickup_datetime TIMESTAMP_NTZ,
     dropoff_datetime TIMESTAMP_NTZ,
+    pickup_location_id INTEGER,
+    dropoff_location_id INTEGER,
     trip_distance FLOAT,
     ride_duration_minutes FLOAT,
     avg_speed_mph FLOAT,
@@ -139,6 +144,7 @@ CREATE OR REPLACE TABLE SILVER_NY_TAXI_RIDES_REJECTS (
     rejection_stage STRING,   -- 'silver_quality_check'
     rejection_time TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP
 );
+
 
 CREATE OR REPLACE TABLE SILVER_LOAD_LOG (
   log_id INT AUTOINCREMENT PRIMARY KEY,
