@@ -26,15 +26,14 @@ def dim_rate_code_ingest(session: Session) -> str:
     # Map rate_code_id to descriptive name
     rate_code_df = rate_code_df.with_column(
         "RATE_CODE_NAME",
-        when(col("RATE_CODE_ID") == "1", lit("Standard rate"))
-        .when(col("RATE_CODE_ID") == "2", lit("JFK"))
-        .when(col("RATE_CODE_ID") == "3", lit("Newark"))
-        .when(col("RATE_CODE_ID") == "4", lit("Nassau or Westchester"))
-        .when(col("RATE_CODE_ID") == "5", lit("Negotiated fare"))
-        .when(col("RATE_CODE_ID") == "6", lit("Group ride"))
+        when(col("RATE_CODE_ID") == lit(1), lit("Standard rate"))
+        .when(col("RATE_CODE_ID") == lit(2), lit("JFK"))
+        .when(col("RATE_CODE_ID") == lit(3), lit("Newark"))
+        .when(col("RATE_CODE_ID") == lit(4), lit("Nassau or Westchester"))
+        .when(col("RATE_CODE_ID") == lit(5), lit("Negotiated fare"))
+        .when(col("RATE_CODE_ID") == lit(6), lit("Group ride"))
         .otherwise(lit("Other"))
     )
-
     # Cast and rename columns to match RATE_CODE_DIM
     rate_code_df = rate_code_df.select(
         col("RATE_CODE_ID").alias("RATECODEID"),
@@ -55,7 +54,6 @@ def dim_rate_code_ingest(session: Session) -> str:
             })
         ]
     )
-
 
     # Log the load
     end_timestamp = datetime.now()
