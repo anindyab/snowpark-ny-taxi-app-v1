@@ -42,7 +42,9 @@ CREATE OR REPLACE TABLE BRONZE_NY_TAXI_RIDES (
   cbd_congestion_fee FLOAT,
   ride_month INTEGER,
   ride_type STRING,
-  file_name STRING
+  file_name STRING,
+  base_name STRING,
+  UNIQUE(ride_id) -- Ensure ride_id uniqueness
 );
 
 CREATE OR REPLACE TABLE BRONZE_NY_TAXI_RIDES_REJECTS (
@@ -71,6 +73,8 @@ CREATE OR REPLACE TABLE BRONZE_NY_TAXI_RIDES_REJECTS (
   ride_month INTEGER,
   ride_type STRING,
   file_name STRING,
+  base_name STRING,
+  UNIQUE(ride_id),                 -- Ensure ride_id uniqueness 
 
   -- Additional audit columns
   rejection_reason STRING,         -- e.g. 'missing pickup_datetime', 'negative fare_amount'
