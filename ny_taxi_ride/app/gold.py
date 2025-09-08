@@ -9,6 +9,7 @@ from dim_vendor_procedure import dim_vendor_ingest
 from dim_trip_distance_procedure import dim_trip_distance_ingest
 from dim_rate_code_procedure import dim_rate_code_ingest
 import time
+from datetime import datetime
 
 def gold_model_procedure(session: Session) -> str:
     """
@@ -17,6 +18,7 @@ def gold_model_procedure(session: Session) -> str:
     Returns:
         str: Status message indicating completion.
     """
+    start_timestamp = datetime.now()
 
     start_time = time.time()
     status = "success"
@@ -37,19 +39,20 @@ def gold_model_procedure(session: Session) -> str:
     end_time = time.time()
     duration = round(end_time - start_time, 2)
 
-    # Log the gold model build
-    session.sql("""
+    # Log the gold model build 
+    end_timestamp = datetime.now()
+    fact_table_name = "FACT_TAXI_RIDES"
+    row_count = 0  # Placeholder; could be updated to actual count if tracked
+    
+    session.sql(f"""
         INSERT INTO FACT_LOAD_LOG (
             fact_table_name, load_start_time, load_end_time, row_count, status, error_message
         )
-        VALUES (?, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), ?, ?, ?)
-    """).bind([
-        "FACT_TAXI_RIDES",
-        0,  # row_count placeholder; could be updated if tracked
-        status,
-        error_message
-    ]).collect()
-
+        VALUES (
+            '{fact_table_name}','{start_timestamp}', '{end_timestamp}', {row_count}, 'success', NULL
+        )
+    """).collect()
+    
     if status == "success":
         return f"Gold layer built successfully in {duration} seconds"
     else:
