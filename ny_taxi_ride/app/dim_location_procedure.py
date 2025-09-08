@@ -39,7 +39,7 @@ def dim_location_ingest(session: Session) -> str:
         location_ids["LOCATION_ID"] == ref_df["LOCATION_ID"],
         "left_outer"
     ).select(
-        location_ids["LOCATION_ID"].alias("LOCATION_ID"),
+        location_ids["LOCATION_ID"].alias("LOCATIONID"),
         location_ids["LOCATION_TYPE"].alias("LOCATION_TYPE"),
         ref_df["BOROUGH"],
         ref_df["ZONE"],
@@ -52,7 +52,7 @@ def dim_location_ingest(session: Session) -> str:
     dim_table = session.table("LOCATION_DIM")
     dim_table.merge(
         enriched_locations,
-        (dim_table["LOCATION_ID"] == enriched_locations["LOCATION_ID"]) &
+        (dim_table["LOCATIONID"] == enriched_locations["LOCATIONID"]) &
         (dim_table["LOCATION_TYPE"] == enriched_locations["LOCATION_TYPE"]),
         [
             when_matched().update({
@@ -63,7 +63,7 @@ def dim_location_ingest(session: Session) -> str:
                 "LONGITUDE": enriched_locations["LONGITUDE"]
             }),
             when_not_matched().insert({
-                "LOCATION_ID": enriched_locations["LOCATION_ID"],
+                "LOCATIONID": enriched_locations["LOCATIONID"],
                 "LOCATION_TYPE": enriched_locations["LOCATION_TYPE"],
                 "BOROUGH": enriched_locations["BOROUGH"],
                 "ZONE": enriched_locations["ZONE"],

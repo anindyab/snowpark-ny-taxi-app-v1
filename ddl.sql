@@ -201,7 +201,8 @@ CREATE OR REPLACE TABLE DATETIME_DIM (
 );
 
 CREATE OR REPLACE TABLE LOCATION_DIM (
-    LOCATION_ID INT PRIMARY KEY,
+    LOCATION_ID INT AUTOINCREMENT START 1 INCREMENT 1 PRIMARY KEY,
+    LOCATIONID INT,
     LOCATION_TYPE VARCHAR(10),
     BOROUGH VARCHAR(20),
     ZONE VARCHAR(75),
@@ -238,7 +239,8 @@ CREATE OR REPLACE TABLE FACT_TAXI_RIDES (
     fact_id INT AUTOINCREMENT PRIMARY KEY,
     ride_id STRING,
     vendor_id INT,
-    datetime_id INT,
+    pickup_datetime_id INT,
+    dropoff_datetime_id INT,
     passenger_count_id INT,
     trip_distance_id INT,
     rate_code_id INT,
@@ -256,14 +258,15 @@ CREATE OR REPLACE TABLE FACT_TAXI_RIDES (
     congestion_surcharge FLOAT,
     airport_fee FLOAT,
     cbd_congestion_fee FLOAT,
-    ride_month INTEGER,
+    ride_month STRING,
     ride_type STRING,
     ride_duration_minutes FLOAT,
     avg_speed_mph FLOAT,
     is_airport_trip BOOLEAN,
     is_peak_hour BOOLEAN,
 
-    FOREIGN KEY (datetime_id) REFERENCES DATETIME_DIM(DATETIME_ID),
+    FOREIGN KEY (pickup_datetime_id) REFERENCES DATETIME_DIM(DATETIME_ID),
+    FOREIGN KEY (dropoff_datetime_id) REFERENCES DATETIME_DIM(DATETIME_ID),
     FOREIGN KEY (passenger_count_id) REFERENCES PASSENGER_COUNT_DIM(passenger_count_id),
     FOREIGN KEY (trip_distance_id) REFERENCES TRIP_DISTANCE_DIM(trip_distance_id),
     FOREIGN KEY (rate_code_id) REFERENCES RATE_CODE_DIM(rate_code_id),
@@ -271,7 +274,9 @@ CREATE OR REPLACE TABLE FACT_TAXI_RIDES (
     FOREIGN KEY (dropoff_location_id) REFERENCES LOCATION_DIM(location_id),
     FOREIGN KEY (payment_type_id) REFERENCES PAYMENT_TYPE_DIM(payment_type_id),
     FOREIGN KEY (vendor_id) REFERENCES VENDOR_DIM(vendor_id)
-) 	CLUSTER BY (ride_month, pickup_location_id, datetime_id);
+)
+CLUSTER BY (ride_month, pickup_location_id, dropoff_location_id, pickup_datetime_id, dropoff_datetime_id);
+
 
 CREATE OR REPLACE TABLE DIMENSION_LOAD_LOG (
   log_id INT AUTOINCREMENT PRIMARY KEY,

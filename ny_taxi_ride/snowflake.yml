@@ -24,7 +24,7 @@ snowpark:
       returns: string
       runtime: 3.9
 
-    - name: fact_taxi_rides_procedure
+    - name: fact_taxi_rides_ingest
       handler: fact_taxi_rides_procedure.fact_taxi_rides_ingest
       signature: []
       returns: string
