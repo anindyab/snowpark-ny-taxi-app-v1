@@ -1,6 +1,6 @@
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import (
-    col, when_not_matched
+    col, call_function, when_not_matched
 )
 from datetime import datetime
 
@@ -20,14 +20,37 @@ def fact_taxi_rides_ingest(session: Session) -> str:
         payment_type_dim = session.table("PAYMENT_TYPE_DIM")
         passenger_dim = session.table("PASSENGER_COUNT_DIM")
         distance_dim = session.table("TRIP_DISTANCE_DIM")
-        datetime_dim_pickup = session.table("DATETIME_DIM").alias("dt_pickup")
-        datetime_dim_dropoff = session.table("DATETIME_DIM").alias("dt_dropoff")
-        location_dim_pickup = session.table("LOCATION_DIM").alias("loc_pickup")
-        location_dim_dropoff = session.table("LOCATION_DIM").alias("loc_pickup")
+        datetime_dim_df = session.table("DATETIME_DIM")
+        location_dim_df = session.table("LOCATION_DIM")
+
+        datetime_dim_pickup = datetime_dim_df.group_by("TPEP_PICKUP_DATETIME").agg(
+            call_function("min", col("DATETIME_ID")).alias("DATETIME_ID")
+        )
+        
+        datetime_dim_dropoff = datetime_dim_df.group_by("TPEP_DROPOFF_DATETIME").agg(
+            call_function("min", col("DATETIME_ID")).alias("DATETIME_ID")
+        )
+        
+        location_dim_pickup = (
+            location_dim_df
+            .filter(col("LOCATION_TYPE") == "pickup")
+            .select("LOCATION_ID", "LOCATIONID")
+            .distinct()
+        )
+        
+        location_dim_dropoff = (
+            location_dim_df
+            .filter(col("LOCATION_TYPE") == "dropoff")
+            .select("LOCATION_ID", "LOCATIONID")
+            .distinct()
+        )
+       
+
     except Exception as e:
         return f"Error reading source tables: {e}"
 
     # Resolve surrogate keys
+  
     fact_df = silver_df \
     .join(vendor_dim, silver_df["VENDOR_ID"] == vendor_dim["VENDORID"], "left") \
     .join(rate_code_dim, silver_df["RATE_CODE_ID"].cast("int") == rate_code_dim["RATECODEID"], "left") \
@@ -37,7 +60,7 @@ def fact_taxi_rides_ingest(session: Session) -> str:
     .join(datetime_dim_pickup, silver_df["PICKUP_DATETIME"] == datetime_dim_pickup["TPEP_PICKUP_DATETIME"], "left") \
     .join(datetime_dim_dropoff, silver_df["DROPOFF_DATETIME"] == datetime_dim_dropoff["TPEP_DROPOFF_DATETIME"], "left") \
     .join(location_dim_pickup, silver_df["PICKUP_LOCATION_ID"].cast("int") == location_dim_pickup["LOCATIONID"], "left") \
-    .join(location_dim_dropoff, silver_df["DROPOFF_LOCATION_ID"].cast("int") == location_dim_dropoff["LOCATIONID"], "left")
+    .join(location_dim_dropoff, silver_df["DROPOFF_LOCATION_ID"].cast("int") == location_dim_dropoff["LOCATIONID"], "left") 
 
     # Select and rename columns to match FACT_TAXI_RIDES
     fact_df = fact_df.select(
